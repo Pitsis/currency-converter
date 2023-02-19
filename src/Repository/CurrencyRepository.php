@@ -39,6 +39,18 @@ class CurrencyRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAll(): array
+    {
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            'SELECT c
+            FROM App\Entity\Currency c'
+        );
+
+        return $query->getResult();
+    }
+
 //    /**
 //     * @return Currency[] Returns an array of Currency objects
 //     */

@@ -1,34 +1,63 @@
 <?php
 
+namespace App\Controller;
+
+use App\Entity\Currency;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-/**
- * @Route("/api/currencies")
- */
 class CurrencyController extends AbstractController
 {
-    /**
-     * @Route("/", methods={"POST"})
-     */
-    public function create(Request $request): Response
+
+    private $em;
+
+    public function __construct(EntityManagerInterface $em)
     {
+        $this->em = $em;
+    }
+
+    /**
+     * @Route("/api/currencies", name="get_currencies", methods={"GET"})
+     */
+    public function getCurrencies(): Response
+    {
+        $currencies = $this->em->getRepository(Currency::class)->findAll();
+
+        return $this->json($currencies);
+    }
+    
+    /**
+     * @Route("/api/currencies", name="add_currency", methods={"POST"})
+     */
+    public function addCurrency(Request $request): Response
+    {        
         $data = json_decode($request->getContent(), true);
         
-        // Create a new Currency object
         $currency = new Currency();
         $currency->setName($data['name']);
+        $currency->setCode($data['code']);
         $currency->setSymbol($data['symbol']);
         
-        // Save the new Currency object to the database
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($currency);
-        $entityManager->flush();
+        $this->em->persist($currency);
+        $this->em->flush();
+
+        $response = [
+            'success' => true,
+            'message' => 'Currency created successfully!',
+            'data' => [
+                'id' => $currency->getId(),
+                'name' => $currency->getName(),
+                'code' => $currency->getCode(),
+                'symbol' => $currency->getSymbol(),
+            ],
+        ];
         
-        // Return a JSON response with the new Currency object
-        return $this->json($currency, Response::HTTP_CREATED);
-    }
+        return new JsonResponse($response, Response::HTTP_CREATED);
+    }    
 }
+
 ?>

@@ -4,10 +4,12 @@ controllers:
     namespace: App\Controller
   type: attribute
 
-api_currency:
+api_currencies:
   path: /api/currencies
-  controller: App\Controller\Api\CurrencyController
+  controller: App\Controller\CurrencyController::getCurrencies
+  methods: [GET]
 
-api_currency_exchange:
-  path: /api/currencies/exchange
-  controller: App\Controller\Api\CurrencyExchangeController
+api_currencies_create:
+  path: /api/currencies
+  controller: App\Controller\CurrencyController::addCurrency
+  methods: [POST]
