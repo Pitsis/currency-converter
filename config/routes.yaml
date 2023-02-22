@@ -4,9 +4,14 @@ controllers:
     namespace: App\Controller
   type: attribute
 
-api_currencies:
+get_currencies:
   path: /api/currencies
   controller: App\Controller\CurrencyController::getCurrencies
+  methods: [GET]
+
+get_currency:
+  path: /api/currencies/{id}
+  controller: App\Controller\CurrencyController::getCurrency
   methods: [GET]
 
 api_currencies_create:

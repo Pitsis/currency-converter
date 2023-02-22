@@ -24,16 +24,12 @@ class Currency
     #[ORM\Column(length: 255)]
     private ?string $symbol = null;
 
-    #[ORM\OneToMany(mappedBy: 'sourceCurrency', targetEntity: ExchangeRate::class)]
+    #[ORM\OneToMany(mappedBy: 'source_currency', targetEntity: ExchangeRate::class)]
     private Collection $exchangeRates;
-
-    #[ORM\OneToMany(mappedBy: 'currency', targetEntity: ExchangeRate::class)]
-    private Collection $exchangeRate;
 
     public function __construct()
     {
         $this->exchangeRates = new ArrayCollection();
-        $this->exchangeRate = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,13 +101,5 @@ class Currency
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, ExchangeRate>
-     */
-    public function getExchangeRate(): Collection
-    {
-        return $this->exchangeRate;
     }
 }

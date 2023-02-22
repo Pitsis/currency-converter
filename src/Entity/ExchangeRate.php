@@ -15,18 +15,13 @@ class ExchangeRate
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'exchangeRates')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Currency $sourceCurrency = null;
+    private ?Currency $source_currency = null;
 
     #[ORM\ManyToOne(inversedBy: 'exchangeRates')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Currency $targetCurrency = null;
+    private ?Currency $target_currency = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 6)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 4)]
     private ?string $rate = null;
-
-    #[ORM\ManyToOne(inversedBy: 'exchangeRate')]
-    private ?Currency $currency = null;
 
     public function getId(): ?int
     {
@@ -35,24 +30,24 @@ class ExchangeRate
 
     public function getSourceCurrency(): ?Currency
     {
-        return $this->sourceCurrency;
+        return $this->source_currency;
     }
 
-    public function setSourceCurrency(?Currency $sourceCurrency): self
+    public function setSourceCurrency(?Currency $source_currency): self
     {
-        $this->sourceCurrency = $sourceCurrency;
+        $this->source_currency = $source_currency;
 
         return $this;
     }
 
     public function getTargetCurrency(): ?Currency
     {
-        return $this->targetCurrency;
+        return $this->target_currency;
     }
 
-    public function setTargetCurrency(?Currency $targetCurrency): self
+    public function setTargetCurrency(?Currency $target_currency): self
     {
-        $this->targetCurrency = $targetCurrency;
+        $this->target_currency = $target_currency;
 
         return $this;
     }
@@ -65,18 +60,6 @@ class ExchangeRate
     public function setRate(string $rate): self
     {
         $this->rate = $rate;
-
-        return $this;
-    }
-
-    public function getCurrency(): ?Currency
-    {
-        return $this->currency;
-    }
-
-    public function setCurrency(?Currency $currency): self
-    {
-        $this->currency = $currency;
 
         return $this;
     }

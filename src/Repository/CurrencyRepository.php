@@ -51,28 +51,17 @@ class CurrencyRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-//    /**
-//     * @return Currency[] Returns an array of Currency objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findExchangeRate(Currency $sourceCurrency, string $targetCode): ?float
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.exchangeRates', 'er')
+            ->andWhere('er.targetCurrency = :targetCode')
+            ->andWhere('er.sourceCurrency = :sourceCurrency')
+            ->setParameter('targetCode', $targetCode)
+            ->setParameter('sourceCurrency', $sourceCurrency);
 
-//    public function findOneBySomeField($value): ?Currency
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $result = $qb->getQuery()->getOneOrNullResult();
+
+        return $result ? $result->getExchangeRate() : null;
+    }
 }
