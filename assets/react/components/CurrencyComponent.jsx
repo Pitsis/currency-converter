@@ -1,17 +1,19 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import { useState, useEffect } from "react";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { useEffect } from "react";
+import Select from "@mui/material/Select";
 import $ from "jquery";
 
 function CurrencyComponent(props) {
-  const [currency, setCurrency] = React.useState();
+  const [currency, setCurrency] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [currencies, setCurrencies] = React.useState([]);
 
+  /**
+   * Calls the API to fetch the currencies data and sets the fetched data to the state variable @var currencies.
+   */
   useEffect(() => {
     fetch("/api/currencies", {
       method: "GET",
@@ -20,10 +22,15 @@ function CurrencyComponent(props) {
       },
     })
       .then((response) => response.json())
-      .then((data) => setCurrencies(data))
+      .then((data) => setCurrencies(data["hydra:member"]))
       .catch((error) => console.error(error));
   }, []);
 
+  /**
+   * If both the @var sourceCode" and @var targetCode" are set, makes an API call to retrieve the exchange rate
+   * sets the "rate" and "symbol" states if the API call is successful, it also resets the amount field every time a new currency is selected
+   * if a currency is selected that doesn't have a related exchangeRate then it just resets the amount and rate
+   */
   useEffect(() => {
     var sourceCode = $("#from-currency").next().val();
     var targetCode = $("#to-currency").next().val();
@@ -40,18 +47,20 @@ function CurrencyComponent(props) {
       )
         .then((response) => response.json())
         .then((data) => {
-          // console.log(data);
           data.success
-            ? (props.setRate(data.data.rate), props.setSymbol(data.data.symbol))
-            : (console.log(data), props.setAmount(""));
+            ? (props.setRate(data.data.rate),
+              props.setSymbol(data.data.symbol),
+              props.setAmount(""))
+            : (props.setAmount(""), props.setRate(null));
         })
         .catch((error) => console.error(error));
     }
-
-    //
   }, [currency]);
 
-  const handleChange = (event) => {
+  /**
+   * function passed on by the parent component that sets the Currency From or Currency To depending on which component uses it
+   */
+  const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
     if (event.target.name == "from-currency") {
       props.setCurrencyFrom(event.target.value);
@@ -65,34 +74,8 @@ function CurrencyComponent(props) {
   };
 
   const handleCurrencyOpen = () => {
-    fetch("/api/currencies", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => setCurrencies(data))
-      .then(setOpen(true))
-      .catch((error) => console.error(error));
+    setOpen(true);
   };
-
-  // const handleCreateCurrency = () => {
-  //   fetch("/api/currencies", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       name: "Great British Pound", // to be changed
-  //       code: "GBP", // to be changed
-  //       symbol: "£", // to be changed
-  //     }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => console.log(data))
-  //     .catch((error) => console.error(error));
-  // };
 
   return (
     <>
@@ -107,11 +90,8 @@ function CurrencyComponent(props) {
           onOpen={handleCurrencyOpen}
           value={currency}
           label="Currency"
-          onChange={handleChange}
+          onChange={handleCurrencyChange}
         >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
           {currencies.map((currency) => (
             <MenuItem key={currency.id} value={currency.code}>
               {currency.code}

@@ -6,25 +6,60 @@ use App\Repository\CurrencyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CurrencyRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(normalizationContext: ['groups' => 'currency:get']),
+        new GetCollection(normalizationContext: ['groups' => 'currency:get']),
+        new Post(denormalizationContext: ['groups' => 'currency:post']),
+        new Delete(normalizationContext: ['groups' => 'currency:delete']),
+        new Patch(denormalizationContext: ['groups' => 'currency:patch']),
+    ],
+    order: ['id' => 'ASC'],
+    paginationEnabled: false,
+)]
 class Currency
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['currency:get', 'currency:delete'])]
     private ?int $id = null;
 
+    /**
+     * Represents the @var name of a currency
+     */
     #[ORM\Column(length: 255)]
+    #[Groups(['currency:get', 'currency:post', 'currency:patch'])]
     private ?string $name = null;
 
+    /**
+     * Represents the @var code of a currency
+     */
     #[ORM\Column(length: 255)]
+    #[Groups(['currency:get', 'currency:post', 'currency:patch'])]
     private ?string $code = null;
 
+    /**
+     * Represents the @var symbol of a currency
+     */
     #[ORM\Column(length: 255)]
+    #[Groups(['currency:get', 'currency:post', 'currency:patch'])]
     private ?string $symbol = null;
 
+    /**
+     * A OneToMany relationship with the ExchangeRate class
+     */
     #[ORM\OneToMany(mappedBy: 'source_currency', targetEntity: ExchangeRate::class)]
+    #[Groups(['currency:get'])]
     private Collection $exchangeRates;
 
     public function __construct()

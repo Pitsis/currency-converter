@@ -21,7 +21,6 @@ class CurrencyController extends AbstractController
         $this->em = $em;
     }
 
-    //#[Route('/api/currencies', name: 'get_currencies', methods: ['GET'])]
     public function getCurrencies(): JsonResponse
     {
         $currencies = $this->em->getRepository(Currency::class)->findAll();
@@ -29,7 +28,6 @@ class CurrencyController extends AbstractController
         return $this->json($currencies);
     }
     
-    //#[Route('/api/currencies/{id}', name: 'get_currency', methods: ['GET'])]
     public function getCurrency(int $id): JsonResponse
     {
         $currency = $this->em->getRepository(Currency::class)->find($id);
@@ -40,35 +38,6 @@ class CurrencyController extends AbstractController
     
         return $this->json($currency);
     }
-    
-    /**
-     * @Route("/api/currencies", name="add_currency", methods={"POST"})
-     */
-    public function addCurrency(Request $request): Response
-    {        
-        $data = json_decode($request->getContent(), true);
-        
-        $currency = new Currency();
-        $currency->setName($data['name']);
-        $currency->setCode($data['code']);
-        $currency->setSymbol($data['symbol']);
-        
-        $this->em->persist($currency);
-        $this->em->flush();
-
-        $response = [
-            'success' => true,
-            'message' => 'Currency created successfully!',
-            'data' => [
-                'id' => $currency->getId(),
-                'name' => $currency->getName(),
-                'code' => $currency->getCode(),
-                'symbol' => $currency->getSymbol(),
-            ],
-        ];
-        
-        return new JsonResponse($response, Response::HTTP_CREATED);
-    }    
 
     #[Route('/api/exchangerate', name: 'get_exchange_rate', methods: 'GET')]
     public function getExchangeRate(Request $request): Response
@@ -80,7 +49,7 @@ class CurrencyController extends AbstractController
         $sourceCurrency = $currencyRepository->findOneBy(['code' => $sourceCode]);
         $targetCurrency = $currencyRepository->findOneBy(['code' => $targetCode]);
 
-        // If either currency is not found, return null
+        // If either currency is not found, return an error
         if (!$sourceCurrency || !$targetCurrency) {
             return $this->json(['error' => 'Please provide both sourceCode and targetCode'], Response::HTTP_BAD_REQUEST);
         }
@@ -91,7 +60,7 @@ class CurrencyController extends AbstractController
             'target_currency' => $targetCurrency->getId(),
         ]); 
 
-        // If exchange rate is not found, return null
+        // If exchange rate is not found, return an error
         if (!$exchangeRate) {
             return $this->json(['error' => 'No exchange rate found for the provided currencies'], Response::HTTP_NOT_FOUND);
         }
@@ -108,6 +77,43 @@ class CurrencyController extends AbstractController
         ];
         
         return new JsonResponse($response, Response::HTTP_CREATED);
+    }
+
+    #[Route('/api/currencies', name: 'create_currency', methods: ['POST'])]
+    public function create(Request $request): Response
+    {
+
+        $currency = new Currency();
+        $currency->setName($request->request->get('name'));
+        $currency->setSymbol($request->request->get('symbol'));
+        $currency->setCode($request->request->get('code'));
+
+        $this->em->persist($currency);
+        $this->em->flush();
+
+        return $this->json($currency);
+    }
+
+    #[Route('/api/currencies/{id}', name: 'update_currency', methods: ['PUT', 'PATCH'])]
+    public function update(Currency $currency, Request $request): Response
+    {
+        $currency->setName($request->request->get('name'));
+        $currency->setSymbol($request->request->get('symbol'));
+        $currency->setCode($request->request->get('code'));
+
+        $this->em->persist($currency);
+        $this->em->flush();
+
+        return $this->json($currency);
+    }
+
+    #[Route('/api/currencies/{id}', name: 'delete_currency', methods: ['DELETE'])]
+    public function delete(Currency $currency): Response
+    {
+        $this->em->remove($currency);
+        $this->em->flush();
+
+        return $this->json(['message' => 'Currency deleted']);
     }
 }
 

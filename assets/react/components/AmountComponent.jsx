@@ -2,13 +2,14 @@ import * as React from "react";
 import TextField from "@mui/material/TextField";
 
 function AmountComponent(props) {
-  const handleChange = (event) => {
+  const handleAmountChange = (event) => {
     props.setAmount(event.target.value);
   };
+
   return (
     <TextField
       label={props.label}
-      onChange={handleChange}
+      onChange={handleAmountChange}
       type="number"
       inputProps={{
         min: 0,
